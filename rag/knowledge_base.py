@@ -163,6 +163,7 @@ class KnowledgeBaseManager:
         top_k: int = app_config.RETRIEVAL_TOP_K,
         include_common: bool = True,
     ) -> List[Chunk]:
+        self.ensure_ready()
         chunks, notes = self.kb.retrieve(query, domain_key, top_k=top_k, include_common=include_common)
         for note in notes:
             LOGGER.info("检索提示：%s", note)
@@ -170,6 +171,12 @@ class KnowledgeBaseManager:
             for note in notes:
                 self.on_log(f"⚠️ {note}")
         return chunks
+
+    def ensure_ready(self) -> None:
+        """确保 Embedding 模型已加载到内存（懒加载）。"""
+        if self._kb is None:
+            self._kb = KnowledgeBase(self.provider, on_log=self.on_log)
+        _ = self.embedding_info  # 访问一次，触发模型加载
 
     def search_with_notes(self, query: str, domain_key: str, **kwargs) -> tuple:
         return self.kb.retrieve(query, domain_key, **kwargs)

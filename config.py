@@ -147,9 +147,16 @@ DOMAINS: Dict[str, Domain] = {
         knowledge_subdir="common",
         keywords=["测试用例", "边界值", "等价类", "接口测试", "异常", "幂等", "鉴权"],
     ),
+    "mycompany": Domain(
+    key="mycompany",
+    name="商品管理系统",
+    description="商品创建、查询、库存扣减、删除。",
+    knowledge_subdir="mycompany",
+    keywords=["商品", "库存", "价格", "扣减"],
+    ),
 }
 
-DOMAIN_ORDER: List[str] = ["library", "ecommerce", "course"]
+DOMAIN_ORDER = ["library", "ecommerce", "course", "mycompany"]
 DOMAIN_CHOICES: List[str] = DOMAIN_ORDER + ["common"]
 DEFAULT_DOMAIN: str = _env("DEFAULT_DOMAIN", "library")
 if DEFAULT_DOMAIN not in DOMAINS:

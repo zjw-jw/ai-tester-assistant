@@ -163,14 +163,11 @@ def render_sidebar() -> None:
 
         st.divider()
         render_model_config()
-
         st.divider()
         render_kb_panel()
-
         st.divider()
         with st.expander("运行日志", expanded=False):
             st.code("\n".join(SS.logs[-40:]) or "（暂无日志）", language="text")
-
 
 def render_model_config() -> None:
     st.markdown("#### ⚙️ 模型配置")
@@ -284,56 +281,23 @@ def render_model_config() -> None:
 def render_kb_panel() -> None:
     st.markdown("#### 📚 知识库管理")
     try:
-        manager = kb_manager()
-        statuses = manager.statuses()
+        import chromadb
+        chroma_path = app_config.STORAGE_DIR / "chroma"   # 👈 路径不对就改这里
+        if not chroma_path.exists():
+            st.caption("（知识库尚未初始化，请点击下方按钮）")
+            return
+        client = chromadb.PersistentClient(path=str(chroma_path))
+        collections = client.list_collections()
+        if not collections:
+            st.caption("（知识库为空，请点击下方按钮初始化）")
+            return
+        for col in collections:
+            count = col.count()
+            icon = "🟢" if count > 0 else "⚪"
+            st.markdown(f"{icon} **{col.name}** — {count} 个片段")
+        st.caption("（只读模式，不加载 Embedding 模型）")
     except Exception as exc:
         st.error(f"知识库不可用：{type(exc).__name__}: {exc}")
-        return
-
-    for status in statuses:
-        icon = "🟢" if status.ready else "⚪"
-        st.markdown(f"{icon} **{status.name}** — {status.count} 个片段")
-
-    info = manager.embedding_info
-    st.caption(f"向量模型：{info.quality_hint}")
-    st.caption(f"（{info.kind} · {info.model or '-'} · {info.dim or '-'} 维）")
-
-    stale = manager.stale_domains()
-    if stale:
-        names = "、".join(s.name for s in stale)
-        st.warning(f"⚠️ 以下业务域的索引是用其他向量模型建立的，检索结果不可用，请重建：{names}")
-
-    col_a, col_b = st.columns(2)
-    with col_a:
-        if st.button("🏗️ 重建当前域", use_container_width=True):
-            with st.spinner(f"正在重建「{current_domain().name}」…"):
-                result = manager.rebuild(SS.domain_key)
-            log(f"重建「{current_domain().name}」：{result.get('files', 0)} 文件 / {result.get('chunks', 0)} 片段")
-            st.toast(f"已重建：{result.get('chunks', 0)} 个片段", icon="✅")
-            st.rerun()
-    with col_b:
-        if st.button("♻️ 重建全部", use_container_width=True):
-            with st.spinner("正在重建全部知识域…"):
-                results = manager.rebuild_all()
-            for result in results:
-                log(f"重建 {app_config.domain_label(result['domain'])}：{result.get('chunks', 0)} 片段")
-            st.toast("全部知识库已重建", icon="✅")
-            st.rerun()
-
-    if st.button("🧹 清空当前域的上传文档", use_container_width=True, help="只删除上传/粘贴的文档，保留预置知识库"):
-        manager.clear_uploads(SS.domain_key)
-        SS.uploaded_docs = []
-        log(f"已清空「{current_domain().name}」的上传文档")
-        st.rerun()
-
-    with st.expander("业务域与预置文档", expanded=False):
-        for item in manager.domain_catalog():
-            st.markdown(f"**{item['name']}**（`{item['key']}`）")
-            st.caption(item["description"])
-            for name in item["documents"]:
-                st.markdown(f"- `knowledge/{item['key']}/{name}`")
-        stat = manager.preset_stat()
-        st.caption(f"预置知识库：{stat['domains']} 个业务域 / {stat['files']} 个文件 / 约 {stat['chars']} 字符")
 
 
 # ---------------------------------------------------------------------------
@@ -663,15 +627,21 @@ def generate(user_input: str) -> None:
 # ---------------------------------------------------------------------------
 # 主流程
 # ---------------------------------------------------------------------------
-def main() -> None:
-    bootstrap_knowledge_base()
 
+def main() -> None:
     with st.sidebar:
         render_sidebar()
+        st.divider()
+        if st.button("🏗️ 初始化/检查知识库", use_container_width=True):
+            with st.spinner("正在加载模型并构建知识库，请耐心等待..."):
+                bootstrap_knowledge_base()
+            st.success("知识库就绪！")
+            st.rerun()
 
+    st.write("DEBUG-A: 侧边栏已完成")  # 👈 加这里
     render_tester_header()
+    st.write("DEBUG-B: 头部已完成")  # 👈 加这里
     st.divider()
-
     tab_chat, tab_exec = st.tabs(["🧪 阶段一 · 对话与用例设计", "⚙️ 阶段二 · 生成并执行测试"])
 
     with tab_chat:
