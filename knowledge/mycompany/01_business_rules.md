@@ -1,4 +1,10 @@
-# 商品管理业务规则
+
+---
+
+### 📄 3. 业务规则文档（放进 `knowledge/mycompany/01_business_rules.md`）
+
+```markdown
+# 商品管理系统 业务规则
 
 ## BR-01 商品名唯一
 同一商品名不能重复创建，重复时返回 409 DUPLICATE_NAME。
@@ -17,3 +23,6 @@
 
 ## BR-06 删除商品后不可查询
 删除后再次查询，返回 404 PRODUCT_NOT_FOUND。
+
+## BR-07 并发扣减防护
+当多个请求同时扣减最后一件库存时，只能有一个成功，其余返回 409 INSUFFICIENT_STOCK。

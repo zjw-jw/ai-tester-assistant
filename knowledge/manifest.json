@@ -51,7 +51,7 @@
       "path": "mycompany",
       "collection": "domain_mycompany",
       "keywords": ["商品", "库存", "价格", "扣减"],
-      "documents": ["01_business_rules.md", "04_api_examples.md"]
+      "documents": ["00_BRD.md","01_business_rules.md", "04_api_examples.md"]
     },
     {
       "key": "common",
