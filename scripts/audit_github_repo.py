@@ -55,9 +55,9 @@ def main() -> int:
             print(f"  {name}")
 
     print()
-    print("=== .env.example 是否含真实密钥 ===")
+    print("=== .env 是否含真实密钥 ===")
     try:
-        blob = fetch(f"https://api.github.com/repos/{REPO}/contents/.env.example")
+        blob = fetch(f"https://api.github.com/repos/{REPO}/contents/.env")
         import base64
 
         text = base64.b64decode(blob["content"]).decode("utf-8")

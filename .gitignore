@@ -47,3 +47,7 @@ Thumbs.db
 # 本地模型服务日志
 llama-server.log
 st-*.log
+
+mycompany_api_test/report/
+mycompany_api_test/reports/
+streamlit_error.log

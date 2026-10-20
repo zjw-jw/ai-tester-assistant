@@ -54,6 +54,15 @@
       "documents": ["00_BRD.md","01_business_rules.md", "04_api_examples.md"]
     },
     {
+  "key": "wecom",
+  "name": "企业微信",
+  "description": "企业微信 API：access_token、日程、部门、成员。",
+  "path": "wecom",
+  "collection": "domain_wecom",
+  "keywords": ["企业微信", "corpid", "access_token", "日程", "部门", "成员"],
+  "documents": ["04_api_examples.md"]
+},
+    {
       "key": "common",
       "name": "通用测试基线",
       "description": "跨业务域通用：测试设计方法、用例编写规范、接口测试基线检查项、常见缺陷模式。",

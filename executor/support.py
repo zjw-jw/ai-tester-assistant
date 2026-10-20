@@ -325,12 +325,14 @@ class CaseAssert:
 
     # -- 内容 -------------------------------------------------------------
     def code(self, expected: Any) -> None:
-        """业务码校验：在顶层 code / data.code / error.code 中任一命中即通过。"""
+        """业务码校验：兼容企业微信标准 errcode 和 FastAPI detail 包裹格式。"""
         self.checked += 1
         payload = self.response.json
         candidates = [
+            json_path(payload, "errcode"),
             json_path(payload, "code"),
             json_path(payload, "data.code"),
+            json_path(payload, "data.errcode"),
             json_path(payload, "error.code"),
             json_path(payload, "errorCode"),
         ]

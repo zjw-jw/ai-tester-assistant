@@ -154,9 +154,16 @@ DOMAINS: Dict[str, Domain] = {
     knowledge_subdir="mycompany",
     keywords=["商品", "库存", "价格", "扣减"],
     ),
+    "wecom": Domain(
+        key="wecom",
+        name="企业微信",
+        description="企业微信 API：access_token、日程、部门、成员。",
+        knowledge_subdir="wecom",
+        keywords=["企业微信", "corpid", "access_token", "日程", "部门", "成员"],
+    ),
 }
 
-DOMAIN_ORDER = ["library", "ecommerce", "course", "mycompany"]
+DOMAIN_ORDER = ["library", "ecommerce", "course", "mycompany", "wecom"]
 DOMAIN_CHOICES: List[str] = DOMAIN_ORDER + ["common"]
 DEFAULT_DOMAIN: str = _env("DEFAULT_DOMAIN", "library")
 if DEFAULT_DOMAIN not in DOMAINS:

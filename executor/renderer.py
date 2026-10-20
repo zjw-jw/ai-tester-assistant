@@ -61,6 +61,27 @@ from executor.support import APIClient, CaseAssert, VariableStore, json_path  # 
 CASES_PATH = _HERE / "support_cases.json"
 
 
+# 方法白名单：路径 → 允许的 HTTP 方法
+ALLOWED_METHODS = {
+    "/api/products": ["POST"],
+    "/api/products/{id}": ["GET", "DELETE"],
+    "/api/products/{id}/deduct": ["POST"],
+}
+
+def validate_method(path: str, method: str, case_id: str) -> None:
+    """检查用例的 HTTP 方法是否匹配路径。不匹配则抛出异常。"""
+    # 去掉路径参数里的具体值，还原成模板
+    normalized = path
+    for segment in path.split("/"):
+        if segment.isdigit():
+            normalized = normalized.replace(segment, "{id}")
+    
+    allowed = ALLOWED_METHODS.get(normalized)
+    if allowed and method.upper() not in allowed:
+        raise ValueError(
+            f"[{case_id}] HTTP 方法错误：路径 {path} 应该用 {'/'.join(allowed)}，"
+            f"但用例写的是 {method}。请检查 AI 生成的 JSON。"
+        )
 def _load_meta() -> dict:
     return json.loads(CASES_PATH.read_text(encoding="utf-8"))
 
