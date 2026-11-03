@@ -1,0 +1,16 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build & Deploy AI Platform') {
+            steps {
+                echo '正在构建 AI 测试助手镜像...'
+                bat 'docker build -t ai-tester-app .'
+
+                bat 'docker stop ai-tester-app || exit 0'
+                bat 'docker rm ai-tester-app || exit 0'
+
+                bat 'docker run -d --name ai-tester-app -p 8501:8501 -v "%cd%\\.env:/app/.env" ai-tester-app'
+            }
+        }
+    }
+}

@@ -1,0 +1,27 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# 1. 安装基础系统依赖（编译一些底层的 Python 库会用到 build-essential 等）
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. 升级 pip 并设置国内镜像源（大幅加速构建）
+RUN pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 3. 先安装体积最大的 CPU 版 torch（利用 Docker 缓存机制，这步最耗时）
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# 4. 拷贝 requirements.txt 并安装剩余依赖
+COPY requirements.txt .
+# 注意：这里我们不再需要重新装 torch，因为 requirements 里已经满足了它的版本要求
+RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 5. 拷贝项目源码
+COPY . .
+
+EXPOSE 8501
+
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
