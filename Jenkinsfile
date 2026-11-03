@@ -1,24 +1,20 @@
 pipeline {
     agent any
     stages {
-        stage('Run Pytest') {
+        stage('Run Tests in Docker') {
             steps {
-                // 切换到测试脚本所在目录
-                dir('C:\\Users\\sclodc\\PycharmProjects\\ai-tester-assistant\\storage\\execution\\generated') {
-                    // 执行 pytest 并生成 allure 数据
-                    bat 'C:\\Users\\sclodc\\PycharmProjects\\ai-tester-assistant\\.venv\\Scripts\\python.exe -m pytest --alluredir=allure-results --clean-alluredir'
-
-                    // 将生成的数据拷贝到 Jenkins 工作空间，避免路径解析问题
-                    bat 'xcopy /E /I /Y allure-results C:\\Users\\sclodc\\AppData\\Local\\Jenkins\\.jenkins\\workspace\\WeCom_Test_V2\\allure-results'
-                }
+                echo '正在启动测试容器执行 pytest...'
+                // 注意：这里假设你的测试脚本在 testing/ 目录下
+                // -v 参数把容器内的 allure-results 挂载到 Windows 当前目录
+                bat 'docker run --rm -v "%cd%\\allure-results:/app/allure-results" ai-tester-app pytest testing/ --alluredir=/app/allure-results --clean-alluredir'
             }
         }
     }
     post {
         always {
-            // 生成 Allure 报告
+            echo '正在读取测试结果生成 Allure 报告...'
+            // 直接读取挂载出来的 allure-results
             allure commandline: 'allure', includeProperties: false, jdk: '', results: [[path: 'allure-results']]
         }
     }
 }
-
