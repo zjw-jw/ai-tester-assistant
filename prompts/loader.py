@@ -43,6 +43,8 @@ def _cached(path_str: str, fallback: str) -> str:
 
 def system_prompt() -> str:
     """基础系统提示词（AI 测试员身份）。"""
+    path = SYSTEM_PROMPT_FILE
+    mtime = path.stat().st_mtime if path.exists() else 0
     return _cached(str(SYSTEM_PROMPT_FILE), _FALLBACK_SYSTEM)
 
 
